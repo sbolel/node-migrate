@@ -1,14 +1,15 @@
+'use strict'
 
-var db = require('../db');
+const db = require('../../util/db')
 
-exports.up = function (next) {
-  db.pets.push({ name: 'tobi' });
-  db.pets.push({ name: 'loki' });
-  next();
-};
+exports.description = 'Adds two pets'
 
-exports.down = function (next) {
-  db.pets.pop();
-  db.pets.pop();
-  next();
-};
+exports.up = async function () {
+  db.pets.push({ name: 'tobi' })
+  db.pets.push({ name: 'loki' })
+}
+
+exports.down = async function () {
+  db.pets.pop()
+  db.pets.pop()
+}

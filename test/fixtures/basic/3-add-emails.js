@@ -1,16 +1,17 @@
+'use strict'
 
-var db = require('../db');
+const db = require('../../util/db')
 
-exports.up = function (next) {
+exports.up = function () {
   db.pets.forEach(function (pet) {
-    pet.email = pet.name + '@learnboost.com';
-  });
-  next();
-};
+    pet.email = pet.name + '@learnboost.com'
+  })
+  return Promise.resolve()
+}
 
-exports.down = function (next) {
+exports.down = function () {
   db.pets.forEach(function (pet) {
-    delete pet.email;
-  });
-  next();
-};
+    delete pet.email
+  })
+  return Promise.resolve()
+}

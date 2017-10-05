@@ -1,12 +1,11 @@
+'use strict'
 
-var db = require('../db');
+const db = require('../../util/db')
 
-exports.up = function (next) {
-  db.issue33.push('2-up');
-  next();
-};
+exports.up = async function () {
+  db.issue33.push('2-up')
+}
 
-exports.down = function (next) {
-  db.issue33.push('2-down');
-  next();
-};
+exports.down = async function () {
+  db.issue33.push('2-down')
+}

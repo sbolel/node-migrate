@@ -1,0 +1,56 @@
+#!/usr/bin/env node
+// vim: set ft=javascript:
+'use strict'
+
+const program = require('commander')
+const path = require('path')
+const log = require('../lib/log')
+const registerCompiler = require('../lib/register-compiler')
+const pkg = require('../package.json')
+
+let _name
+
+program
+  .version(pkg.version)
+  .option('-c, --chdir [dir]', 'Change the working directory', process.cwd())
+  .option('--migrations-dir <dir>', 'Change the migrations directory name', 'migrations')
+  .option('--compiler <ext:module>', 'Use the given module to compile files')
+  .option('-d, --date-format [format]', 'Set a date format to use')
+  .option('-t, --template-file [filePath]', 'Set path to template file to use for new migrations', path.join(__dirname, '..', 'lib', 'template.js'))
+  .option('-e, --extention [extention]', 'Use the given extention to create the file', '.js')
+  .option('-g, --generator <name>', 'A template generator function', path.join(__dirname, '..', 'lib', 'template-generator'))
+  .arguments('<name>')
+  .action(create)
+  .parse(process.argv)
+
+function create (name) {
+  // Name provided?
+  _name = name
+  // Change the working dir
+  process.chdir(program.chdir)
+
+  // Load compiler
+  if (program.compiler) {
+    registerCompiler(program.compiler)
+  }
+
+  // Load the template generator
+  const gen = require(path.resolve(process.cwd(), program.generator))
+  gen({
+    name: name,
+    dateFormat: program.dateFormat,
+    templateFile: program.templateFile,
+    migrationsDirectory: program.migrationsDir,
+    extention: program.extention
+  })
+  .then(p => log('create', p))
+  .catch((err) => {
+    log.error('Template generation error', err.message)
+    process.exit(1)
+  })
+}
+
+if (!_name) {
+  log.error('error', 'Migration name required')
+  log('usage', 'migrate create <name>')
+}

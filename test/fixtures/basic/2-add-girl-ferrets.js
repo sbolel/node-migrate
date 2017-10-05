@@ -1,12 +1,13 @@
+'use strict'
 
-var db = require('../db');
+const db = require('../../util/db')
 
-exports.up = function (next) {
-  db.pets.push({ name: 'jane' });
-  next();
-};
+exports.up = function () {
+  db.pets.push({ name: 'jane' })
+  return Promise.resolve()
+}
 
-exports.down = function (next) {
-  db.pets.pop();
-  next();
-};
+exports.down = function () {
+  db.pets.pop()
+  return Promise.resolve()
+}

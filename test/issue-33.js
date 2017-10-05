@@ -1,54 +1,49 @@
+'use strict'
 
-var fs = require('fs');
-var path = require('path');
-var assert = require('assert');
+/* global describe, it, beforeEach, afterEach */
 
-var migrate = require('../');
-var db = require('./fixtures/db');
+const fs = require('fs')
+const path = require('path')
+const assert = require('assert')
 
-var BASE = path.join(__dirname, 'fixtures', 'issue-33');
-var STATE = path.join(BASE, '.migrate');
+const migrate = require('../')
+const db = require('./util/db')
 
-var A1 = ['1-up', '2-up', '3-up'];
-var A2 = A1.concat(['3-down', '2-down', '1-down']);
+const BASE = path.join(__dirname, 'fixtures', 'issue-33')
+const STATE = path.join(BASE, '.migrate')
+
+const A1 = ['1-up', '2-up', '3-up']
+const A2 = A1.concat(['3-down', '2-down', '1-down'])
 
 describe('issue #33', function () {
+  let set
 
-  var set;
+  beforeEach(async function () {
+    return migrate.load({
+      stateStore: STATE,
+      migrationsDirectory: BASE
+    })
+    .then((s) => {
+      set = s
+    })
+  })
 
-  beforeEach(function () {
-    set = migrate.load(STATE, BASE);
-  });
+  it('should run migrations in the correct order', async function () {
+    await set.up()
+    assert.deepEqual(db.issue33, A1)
 
-  it('should run migrations in the correct order', function (done) {
+    await set.up()
+    assert.deepEqual(db.issue33, A1)
 
-    set.up(function (err) {
-      assert.ifError(err);
-      assert.deepEqual(db.issue33, A1);
+    await set.down()
+    assert.deepEqual(db.issue33, A2)
 
-      set.up(function (err) {
-        assert.ifError(err);
-        assert.deepEqual(db.issue33, A1);
-
-        set.down(function (err) {
-          assert.ifError(err);
-          assert.deepEqual(db.issue33, A2);
-
-          set.down(function (err) {
-            assert.ifError(err);
-            assert.deepEqual(db.issue33, A2);
-
-            done();
-          });
-        });
-      });
-    });
-
-  });
+    await set.down()
+    assert.deepEqual(db.issue33, A2)
+  })
 
   afterEach(function (done) {
-    db.nuke();
-    fs.unlink(STATE, done);
-  });
-
-});
+    db.nuke()
+    fs.unlink(STATE, done)
+  })
+})

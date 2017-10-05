@@ -1,6 +1,10 @@
-# migrate
+# Migrate
 
-  Abstract migration framework for node
+[![NPM Version](https://img.shields.io/npm/v/migrate.svg)](https://npmjs.org/package/migrate)
+[![NPM Downloads](https://img.shields.io/npm/dm/migrate.svg)](https://npmjs.org/package/migrate)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
+Abstract migration framework for node.
 
 *NOTE:* A large refactor is underway for the next major version of this package.  Check out the `1.x` pull request tracking this work, or to explicitly opt in, install the `next` tag (`npm install migrate@next`).
 
@@ -15,157 +19,173 @@ Usage: migrate [options] [command]
 
 Options:
 
-   -c, --chdir <path>      change the working directory
-   --state-file <path>     set path to state file (migrations/.migrate)
-   --template-file <path>  set path to template file to use for new migrations
-   --date-format <format>  set a date format to use for new migration filenames
+  -V, --version  output the version number
+  -h, --help     output usage information
 
 Commands:
 
-   down   [name]    migrate down till given migration
-   up     [name]    migrate up till given migration (the default command)
-   create [title]   create a new migration file with optional [title]
-
+  init           Initalize the migrations tool in a project
+  list           List migrations and their status
+  create <name>  Create a new migration
+  up [name]      Migrate up to a give migration
+  down [name]    Migrate down to a given migration
+  help [cmd]     display help for [cmd]
 ```
+
+For help with the individual commands, see `migrate help [cmd]`.  Each command has some helpful flags
+for customising the behavior of the tool.
 
 ## Programmatic usage
 
 ```javascript
-var migrate = require('migrate');
-var set = migrate.load('migration/.migrate', 'migration');
+const migrate = require('migrate')
 
-set.up(function (err) {
-  if (err) throw err;
-
-  console.log('Migration completed');
-});
+migrate
+  .load({
+    stateStore: '.migrate'
+  })
+  .then(async function (set) {
+    await set.up()
+    console.log('migrations successfully ran')
+  })
 ```
 
 ## Creating Migrations
 
-To create a migration, execute `migrate create` with an optional title. `node-migrate` will create a node module within `./migrations/` which contains the following two exports:
+To create a migration, execute `migrate create <title>` with a title. By default, a file in `./migrations/` will be created with the following content:
 
-    exports.up = function(next){
-      next();
-    };
+```javascript
+'use strict'
 
-    exports.down = function(next){
-      next();
-    };
+module.exports.up = async function () {
 
-All you have to do is populate these, invoking `next()` when complete, and you are ready to migrate!
+}
 
-For example:
+module.exports.down = async function () {
 
-    $ migrate create add-pets
-    $ migrate create add-owners
+}
+```
 
-The first call creates `./migrations/{timestamp in milliseconds}-add-pets.js`, which we can populate:
+All you have to do is populate these, and you are ready to migrate!
 
-      var db = require('./db');
+See examples in [./examples](./examples)
 
-      exports.up = function(next){
-        db.rpush('pets', 'tobi');
-        db.rpush('pets', 'loki');
-        db.rpush('pets', 'jane', next);
-      };
+### Advanced migration creation
 
-      exports.down = function(next){
-        db.rpop('pets');
-        db.rpop('pets');
-        db.rpop('pets', next);
-      };
+When creating migrations you have a bunch of other options to help you control how the migrations are created. You can fully configure the way the migration is made with a `generator`, which is just a function exported as a node module. 
 
-The second creates `./migrations/{timestamp in milliseconds}-add-owners.js`, which we can populate:
+A good example of a generator is the  default one [shipped with this package](./lib/template-generator.js).
 
-      var db = require('./db');
+The `create` command accepts a flag for pointing the tool at a generator, for example:
 
-      exports.up = function(next){
-        db.rpush('owners', 'taylor');
-        db.rpush('owners', 'tj', next);
-      };
+```
+$ migrate create --generator ./my-migrate-generator.js
+```
 
-      exports.down = function(next){
-        db.rpop('owners');
-        db.rpop('owners', next);
-      };
+A more simple and common thing you might want is to just change the default template file which is created.  To do this, you
+can simply pass the `template-file` flag:
+
+```
+$ migrate create --template-file ./my-migration-template.js
+```
+
+Lastly, if you want to use newer ECMAscript features, or language addons like TypeScript, for your migrations, you can use the `comipler` flag.  For example, to use babel with your migrations, you can do the following:
+
+```
+$ npm install --save babel-register
+$ migrate create --compiler=".js:babel-register" foo
+$ migrate up --compiler=".js:babel-register"
+```
 
 ## Running Migrations
 
 When first running the migrations, all will be executed in sequence.
 
-    $ migrate
-    up : migrations/1316027432511-add-pets.js
-    up : migrations/1316027432512-add-jane.js
-    up : migrations/1316027432575-add-owners.js
-    up : migrations/1316027433425-coolest-pet.js
-    migration : complete
+```
+$ migrate
+  up : migrations/1316027432511-add-pets.js
+  up : migrations/1316027432512-add-jane.js
+  up : migrations/1316027432575-add-owners.js
+  up : migrations/1316027433425-coolest-pet.js
+  migration : complete
+```
 
-Subsequent attempts will simply output "complete", as they have already been executed in this machine. `node-migrate` knows this because it stores the current state in `./migrations/.migrate` which is typically a file that SCMs like GIT should ignore.
+Subsequent attempts will simply output "complete", as they have already been executed. `migrate` knows this because it stores the current state in 
+`./.migrate` which is typically a file that SCMs like GIT should ignore.
 
-    $ migrate
-    migration : complete
+```
+$ migrate
+  migration : complete
+```
 
 If we were to create another migration using `migrate create`, and then execute migrations again, we would execute only those not previously executed:
 
-    $ migrate
-    up : migrates/1316027433455-coolest-owner.js
+```
+$ migrate
+  up : migrates/1316027433455-coolest-owner.js
+```
 
 You can also run migrations incrementally by specifying a migration.
 
-    $ migrate up 1316027433425-coolest-pet.js
-    up : migrations/1316027432511-add-pets.js
-    up : migrations/1316027432512-add-jane.js
-    up : migrations/1316027432575-add-owners.js
-    up : migrations/1316027433425-coolest-pet.js
-    migration : complete
+```
+$ migrate up 1316027433425-coolest-pet.js
+  up : migrations/1316027432511-add-pets.js
+  up : migrations/1316027432512-add-jane.js
+  up : migrations/1316027432575-add-owners.js
+  up : migrations/1316027433425-coolest-pet.js
+  migration : complete
+```
 
-This will run up-migrations upto (and including) `1316027433425-coolest-pet.js`. Similarly you can run down-migrations upto (and including) a specific migration, instead of migrating all the way down.
+This will run up-migrations up to (and including) `1316027433425-coolest-pet.js`. Similarly you can run down-migrations up to (and including) a specific migration, instead of migrating all the way down.
 
-    $ migrate down 1316027432512-add-jane.js
-    down : migrations/1316027432575-add-owners.js
-    down : migrations/1316027432512-add-jane.js
-    migration : complete
+```
+$ migrate down 1316027432512-add-jane.js
+  down : migrations/1316027432575-add-owners.js
+  down : migrations/1316027432512-add-jane.js
+  migration : complete
+```
+
+Any time you want to see the current state of the migrations, you can run `migrate list` to see an output like:
+
+```
+$ migrate list
+  1316027432511-add-pets.js [2017-09-23] : <No Description>
+  1316027432512-add-jane.js [2017-09-23] : <No Description>
+```
+
+The description can be added by exporting a `description` field from the migration file.
+
+## Custom State Storage
+
+By default, `migrate` stores the state of the migrations which have been run in a file (`.migrate`).  But you can provide a custom storage engine if you would like to do something different, like storing them in your database of choice.
+
+A storage engine has a simple interface of `load()` and `save(set)`, both should return promises. See the [default interface](./lib/set.js) for an example. As long as what goes in as `set` comes out the same on `load`, then you are good to go!
+
+If you are using the provided cli, you can specify the store implementation with the `--store` flag, which can recieve a path to a `require`-able node module. For example:
+
+```
+$ migrate up --store="my-migration-store"
+```
 
 ## API
 
-### `migrate.load(stateFile, migrationsDirectory)`
+### `migrate.load(opts)`
 
-Returns a `Set` populated with migration scripts from the `migrationsDirectory`
-and state loaded from `stateFile`.
+Return a promise, which resolves to a `Set` based on the options passed.  Options:
 
-### `Set.up([migration, ]cb)`
+- `set`: A set instance if you created your own
+- `stateStore`: A store instance to load and store migration state, or a string which is a path to the migration state file
+- `migrationsDirectory`: The path to the migrations directory
+- `filterFunction`: A filter function which will be called for each file found in the migrations directory
+- `sortFunction`: A sort function to ensure migration order
+
+### `Set.up(migration)`
 
 Migrates up to the specified `migration` or, if none is specified, to the latest
-migration. Calls the callback `cb`, possibly with an error `err`, when done.
+migration. Returns a promise.
 
-### `Set.down([migration, ]cb)`
+### `Set.down(migration)`
 
 Migrates down to the specified `migration` or, if none is specified, to the
 first migration. Calls the callback `cb`, possibly with an error `err`, when
 done.
-
-## License
-
-(The MIT License)
-
-Copyright (c) 2011 TJ Holowaychuk &lt;tj@vision-media.ca&gt;
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
