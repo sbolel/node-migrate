@@ -1,0 +1,25 @@
+name: Node.js CI using Yarn
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+    - name: checkout branch
+      uses: actions/checkout@v2
+    - name: use node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: install yarn
+      run: npm install -g yarn
+    - name: install dependencies from yarn.lock
+      run: yarn install
+    - name: run linter, unit tests, integration tests
+      run: yarn test

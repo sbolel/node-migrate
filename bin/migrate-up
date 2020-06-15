@@ -76,7 +76,7 @@ function loadAndGo () {
       })
 
       // Run
-      let run = (program.clean ? cleanUp : up)
+      const run = (program.clean ? cleanUp : up)
 
       run(set)
         .then(() => {

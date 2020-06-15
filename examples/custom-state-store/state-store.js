@@ -16,12 +16,12 @@ function StateStore (path) {
  */
 
 StateStore.prototype.save = async function (set) {
-  let state = {
+  const state = {
     lastRun: set.lastRun,
     migrations: set.migrations
   }
 
-  let collection = this.db('state')
+  const collection = this.db('state')
   await collection.pop()
   await collection.push(state)
 }
@@ -33,7 +33,7 @@ StateStore.prototype.save = async function (set) {
  */
 
 StateStore.prototype.load = async function () {
-  let collection = this.db('state')
+  const collection = this.db('state')
 
   let doc = await collection.head()
 

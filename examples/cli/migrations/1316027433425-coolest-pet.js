@@ -3,23 +3,23 @@
 const db = require('../db')
 
 exports.up = async function () {
-	let pets = db('pets');
+  const pets = db('pets')
 
-	let taylor = await pets
-		.chain()
-		.find({name: 'tobi'})
-		.assign({coolest: true})
-		.value()
+  const taylor = await pets
+    .chain()
+    .find({ name: 'tobi' })
+    .assign({ coolest: true })
+    .value()
 
-	console.log('taylor', taylor);
+  console.log('taylor', taylor)
 }
 
-exports.down = async  function () {
-	let pets = db('pets');
+exports.down = async function () {
+  const pets = db('pets')
 
-	await pets
-		.chain()
-		.find({name: 'tobi'})
-		.unset('coolest')
-		.value()
+  await pets
+    .chain()
+    .find({ name: 'tobi' })
+    .unset('coolest')
+    .value()
 }

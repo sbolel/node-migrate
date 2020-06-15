@@ -3,11 +3,11 @@
 const db = require('../db')
 
 exports.up = async function () {
-	let pets = db('pets');
-	await pets.push({ name: 'jane' })
+  const pets = db('pets')
+  await pets.push({ name: 'jane' })
 }
 
-exports.down = async  function () {
-	let pets = db('pets');
-	await pets.pop()
+exports.down = async function () {
+  const pets = db('pets')
+  await pets.pop()
 }

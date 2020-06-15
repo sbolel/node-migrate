@@ -23,23 +23,23 @@ describe('issue #33', function () {
       stateStore: STATE,
       migrationsDirectory: BASE
     })
-    .then((s) => {
-      set = s
-    })
+      .then((s) => {
+        set = s
+      })
   })
 
   it('should run migrations in the correct order', async function () {
     await set.up()
-    assert.deepEqual(db.issue33, A1)
+    assert.deepStrictEqual(db.issue33, A1)
 
     await set.up()
-    assert.deepEqual(db.issue33, A1)
+    assert.deepStrictEqual(db.issue33, A1)
 
     await set.down()
-    assert.deepEqual(db.issue33, A2)
+    assert.deepStrictEqual(db.issue33, A2)
 
     await set.down()
-    assert.deepEqual(db.issue33, A2)
+    assert.deepStrictEqual(db.issue33, A2)
   })
 
   afterEach(function (done) {

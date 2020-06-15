@@ -16,33 +16,33 @@ describe('migration set', function () {
   let set
 
   function assertNoPets () {
-    assert.equal(db.pets.length, 0)
+    assert.strictEqual(db.pets.length, 0)
   }
 
   function assertPets () {
-    assert.equal(db.pets.length, 3)
-    assert.equal(db.pets[0].name, 'tobi')
-    assert.equal(db.pets[0].email, 'tobi@learnboost.com')
+    assert.strictEqual(db.pets.length, 3)
+    assert.strictEqual(db.pets[0].name, 'tobi')
+    assert.strictEqual(db.pets[0].email, 'tobi@learnboost.com')
   }
 
   function assertPetsWithDogs () {
-    assert.equal(db.pets.length, 5)
-    assert.equal(db.pets[0].name, 'tobi')
-    assert.equal(db.pets[0].email, 'tobi@learnboost.com')
-    assert.equal(db.pets[4].name, 'suki')
+    assert.strictEqual(db.pets.length, 5)
+    assert.strictEqual(db.pets[0].name, 'tobi')
+    assert.strictEqual(db.pets[0].email, 'tobi@learnboost.com')
+    assert.strictEqual(db.pets[4].name, 'suki')
   };
 
   function assertFirstMigration () {
-    assert.equal(db.pets.length, 2)
-    assert.equal(db.pets[0].name, 'tobi')
-    assert.equal(db.pets[1].name, 'loki')
+    assert.strictEqual(db.pets.length, 2)
+    assert.strictEqual(db.pets[0].name, 'tobi')
+    assert.strictEqual(db.pets[1].name, 'loki')
   }
 
   function assertSecondMigration () {
-    assert.equal(db.pets.length, 3)
-    assert.equal(db.pets[0].name, 'tobi')
-    assert.equal(db.pets[1].name, 'loki')
-    assert.equal(db.pets[2].name, 'jane')
+    assert.strictEqual(db.pets.length, 3)
+    assert.strictEqual(db.pets[0].name, 'tobi')
+    assert.strictEqual(db.pets[1].name, 'loki')
+    assert.strictEqual(db.pets[2].name, 'jane')
   }
 
   beforeEach(function (done) {
@@ -120,21 +120,21 @@ describe('migration set', function () {
 
     set.on('migration', function (migration, direction) {
       migrations.push(migration.title)
-      assert.equal(typeof direction, 'string')
+      assert.strictEqual(typeof direction, 'string')
     })
 
     await set.up()
 
-    assert.equal(saved, 4)
-    assert.equal(db.pets[0].email, 'tobi@lb.com')
-    assert.deepEqual(migrations, expectedMigrations)
+    assert.strictEqual(saved, 4)
+    assert.strictEqual(db.pets[0].email, 'tobi@lb.com')
+    assert.deepStrictEqual(migrations, expectedMigrations)
 
     migrations = []
     expectedMigrations = expectedMigrations.reverse()
 
     await set.down()
-    assert.equal(saved, 8)
-    assert.deepEqual(migrations, expectedMigrations)
+    assert.strictEqual(saved, 8)
+    assert.deepStrictEqual(migrations, expectedMigrations)
     assertNoPets()
   })
 
@@ -152,14 +152,14 @@ describe('migration set', function () {
     await set.up('2-add-girl-ferrets.js')
 
     assertSecondMigration()
-    assert.equal(set.lastRun, '2-add-girl-ferrets.js')
+    assert.strictEqual(set.lastRun, '2-add-girl-ferrets.js')
     await set.down('2-add-girl-ferrets.js')
 
-    assert.equal(set.lastRun, '1-add-guy-ferrets.js')
+    assert.strictEqual(set.lastRun, '1-add-guy-ferrets.js')
   })
 
   it('should load migration descriptions', async function () {
-    assert.equal(set.migrations[0].description, 'Adds two pets')
+    assert.strictEqual(set.migrations[0].description, 'Adds two pets')
   })
 
   afterEach(function (done) {

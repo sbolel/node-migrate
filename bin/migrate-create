@@ -43,11 +43,11 @@ function create (name) {
     migrationsDirectory: program.migrationsDir,
     extention: program.extention
   })
-  .then(p => log('create', p))
-  .catch((err) => {
-    log.error('Template generation error', err.message)
-    process.exit(1)
-  })
+    .then(p => log('create', p))
+    .catch((err) => {
+      log.error('Template generation error', err.message)
+      process.exit(1)
+    })
 }
 
 if (!_name) {

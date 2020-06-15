@@ -27,7 +27,7 @@ describe('integration tests', function () {
 
     await run.create(TMP_DIR, ['2-two', '-d', 'W'])
 
-    let output = await run.up(TMP_DIR, [])
+    const output = await run.up(TMP_DIR, [])
 
     // A warning should log,
     // because migration 2 should come before migration 3,
@@ -41,7 +41,7 @@ describe('integration tests', function () {
 
     await run.create(TMP_DIR, ['1-one', '-d', 'W'])
 
-    let firstOut = await run.create(TMP_DIR, ['3-three', '-d', 'W'])
+    const firstOut = await run.create(TMP_DIR, ['3-three', '-d', 'W'])
     // Keep migration filename to remove
     var filename = firstOut.split(' : ')[1].trim()
 
