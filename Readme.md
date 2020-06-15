@@ -1,5 +1,6 @@
 # Migrate
 
+[![Node.js CI using Yarn](https://github.com/sbolel/node-migrate/workflows/Node.js%20CI%20using%20Yarn/badge.svg)](https://github.com/sbolel/node-migrate/actions?query=workflow%3A%22Node.js+CI+using+Yarn%22)
 [![NPM Version](https://img.shields.io/npm/v/migrate.svg)](https://npmjs.org/package/migrate)
 [![NPM Downloads](https://img.shields.io/npm/dm/migrate.svg)](https://npmjs.org/package/migrate)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
