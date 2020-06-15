@@ -11,7 +11,7 @@ const LIST = path.join(__dirname, '..', '..', 'bin', 'migrate-list')
 
 const run = module.exports = function run (cmd, dir, args, done) {
   return new Promise(function (resolve, reject) {
-    const p = spawn('node', [cmd, '-c', dir, ...args], {shell: true})
+    const p = spawn('node', [cmd, '-c', dir, ...args], { shell: true })
     let stdout = ''
     let stderr = ''
     p.stdout.on('data', function (d) {

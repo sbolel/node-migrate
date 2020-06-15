@@ -10,7 +10,7 @@ exports.up = async function () {
 
 exports.down = async function () {
   db.load()
-  let index = db.numbers.indexOf('1-up')
+  const index = db.numbers.indexOf('1-up')
   db.numbers.splice(index, 1)
   db.persist()
 }

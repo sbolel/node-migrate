@@ -26,7 +26,7 @@ describe('$ migrate', function () {
   afterEach(reset)
 
   describe('init', function () {
-    beforeEach(mkdirp.bind(mkdirp, TMP_DIR))
+    beforeEach(mkdirp.bind(mkdirp, TMP_DIR, null))
 
     it('should create a migrations directory', async function () {
       await run.init(TMP_DIR, [])
@@ -38,7 +38,7 @@ describe('$ migrate', function () {
   }) // end init
 
   describe('create', function () {
-    beforeEach(mkdirp.bind(mkdirp, TMP_DIR))
+    beforeEach(mkdirp.bind(mkdirp, path.resolve(TMP_DIR, 'migrations'), null))
 
     it('should create a fixture file', async function () {
       const output = await run.create(TMP_DIR, ['test'])
@@ -95,7 +95,7 @@ describe('$ migrate', function () {
 
       db.load()
       assert(output.indexOf('up') !== -1)
-      assert.equal(db.numbers.length, 2)
+      assert.strictEqual(db.numbers.length, 2)
       assert(db.numbers.indexOf('1-up') !== -1)
       assert(db.numbers.indexOf('2-up') !== -1)
     })
@@ -105,7 +105,7 @@ describe('$ migrate', function () {
 
       db.load()
       assert(output.indexOf('up') !== -1)
-      assert.equal(db.numbers.length, 1)
+      assert.strictEqual(db.numbers.length, 1)
       assert(db.numbers.indexOf('1-up') !== -1)
       assert(db.numbers.indexOf('2-up') === -1)
     })
@@ -119,7 +119,7 @@ describe('$ migrate', function () {
 
       db.load()
       assert(secondOutput.indexOf('up') === -1)
-      assert.equal(db.numbers.length, 2)
+      assert.strictEqual(db.numbers.length, 2)
     })
 
     it('should run down when passed --clean', async function () {
@@ -129,7 +129,7 @@ describe('$ migrate', function () {
       db.load()
       assert(secondOutput.indexOf('down') !== -1)
       assert(secondOutput.indexOf('up') !== -1)
-      assert.equal(db.numbers.length, 2)
+      assert.strictEqual(db.numbers.length, 2)
     })
   }) // end up
 
@@ -143,7 +143,7 @@ describe('$ migrate', function () {
 
       db.load()
       assert(output.indexOf('down') !== -1)
-      assert.equal(db.numbers.length, 0)
+      assert.strictEqual(db.numbers.length, 0)
       assert(db.numbers.indexOf('1-up') === -1)
       assert(db.numbers.indexOf('2-up') === -1)
     })
@@ -156,7 +156,7 @@ describe('$ migrate', function () {
       db.load()
 
       assert(output.indexOf('down') !== -1)
-      assert.equal(db.numbers.length, 1)
+      assert.strictEqual(db.numbers.length, 1)
       assert(db.numbers.indexOf('1-up') !== -1)
       assert(db.numbers.indexOf('2-up') === -1)
     })
@@ -168,7 +168,7 @@ describe('$ migrate', function () {
 
       const secondOutput = await run.down(FIX_DIR, ['--migrations-dir _migrations'])
       assert(secondOutput.indexOf('down') === -1)
-      assert.equal(db.numbers.length, 0)
+      assert.strictEqual(db.numbers.length, 0)
     })
   }) // end down
 
